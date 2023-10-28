@@ -6,17 +6,15 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import kodlamaio.hrms.core.entities.User;
+import kodlamaio.hrms.core.enums.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
 @Entity
-@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @PrimaryKeyJoinColumn(name = "user_id", referencedColumnName = "id")
@@ -42,11 +40,12 @@ public class JobSeeker extends User {
     @Column(name = "birth_date", nullable = false)
     private Date birthDate;
 
-    public void updateFrom(JobSeeker other) {
-        this.setFirstName(other.getFirstName());
-        this.setLastName(other.getLastName());
-        this.setIdentityNumber(other.getIdentityNumber());
-        this.setEmail(other.getEmail());
-        this.setBirthDate(other.getBirthDate());
+    @NotNull
+    @Column(name = "is_verified", nullable = false, columnDefinition = "boolean default false")
+    private Boolean isVerified;
+
+    public JobSeeker() {
+        setUserType(UserType.JobSeeker);
+        this.isVerified = false;
     }
 }
