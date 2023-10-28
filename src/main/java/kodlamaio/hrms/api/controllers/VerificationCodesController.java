@@ -1,11 +1,11 @@
 package kodlamaio.hrms.api.controllers;
 
 import kodlamaio.hrms.business.abstracts.VerificationCodeService;
+import kodlamaio.hrms.core.utilities.mappers.EntityDtoMapper;
 import kodlamaio.hrms.core.utilities.results.DataResult;
 import kodlamaio.hrms.core.utilities.results.Result;
 import kodlamaio.hrms.entities.concretes.VerificationCode;
 import kodlamaio.hrms.entities.dtos.VerificationCodeDto;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +16,14 @@ import java.util.List;
 @RequestMapping("/api/verificationCodes")
 public class VerificationCodesController {
 
-    private VerificationCodeService verificationCodeService;
-    private ModelMapper modelMapper;
+    private final VerificationCodeService verificationCodeService;
+    private final EntityDtoMapper entityDtoMapper;
 
     @Autowired
     public VerificationCodesController(VerificationCodeService verificationCodeService,
-                                       ModelMapper modelMapper) {
+                                       EntityDtoMapper entityDtoMapper) {
         this.verificationCodeService = verificationCodeService;
-        this.modelMapper = modelMapper;
+        this.entityDtoMapper = entityDtoMapper;
     }
 
     @GetMapping("/getall")
@@ -35,17 +35,13 @@ public class VerificationCodesController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public Result add(@RequestBody VerificationCodeDto verificationCodeDto) {
-        VerificationCode verificationCode = convertToEntity(verificationCodeDto);
+        VerificationCode verificationCode = entityDtoMapper.convertToEntity(verificationCodeDto, VerificationCode.class);
         return this.verificationCodeService.add(verificationCode);
     }
 
     @GetMapping("/{id}")
     public DataResult<VerificationCode> getUserById(@PathVariable Integer id) {
         return verificationCodeService.getById(id);
-    }
-
-    public VerificationCode convertToEntity(VerificationCodeDto verificationCodeDto) {
-        return modelMapper.map(verificationCodeDto, VerificationCode.class);
     }
 
 }

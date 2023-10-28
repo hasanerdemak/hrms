@@ -1,7 +1,6 @@
 package kodlamaio.hrms.business.concretes;
 
 import kodlamaio.hrms.business.abstracts.EmailService;
-import kodlamaio.hrms.core.entities.User;
 import kodlamaio.hrms.core.utilities.results.Result;
 import kodlamaio.hrms.core.utilities.results.SuccessResult;
 import org.springframework.stereotype.Service;

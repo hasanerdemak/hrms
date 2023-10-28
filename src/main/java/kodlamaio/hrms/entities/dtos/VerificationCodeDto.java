@@ -6,10 +6,9 @@ import java.time.ZonedDateTime;
 
 @Data
 public class VerificationCodeDto {
-    private Integer id;
     private Integer userId;
     private String code;
-    private boolean isVerified;
+    private Boolean isVerified;
     private ZonedDateTime createdAt;
     private ZonedDateTime verifiedDate;
 }
