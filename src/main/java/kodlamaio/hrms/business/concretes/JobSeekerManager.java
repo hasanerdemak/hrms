@@ -9,6 +9,7 @@ import kodlamaio.hrms.core.utilities.validators.NameValidator;
 import kodlamaio.hrms.core.utilities.validators.PasswordValidator;
 import kodlamaio.hrms.dataAccess.abstracts.JobSeekerDao;
 import kodlamaio.hrms.entities.concretes.JobSeeker;
+import kodlamaio.hrms.entities.concretes.VerificationCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +34,17 @@ public class JobSeekerManager implements JobSeekerService {
     @Override
     public Result add(JobSeeker jobSeeker) {
         Result validationResult = validateJobSeeker(jobSeeker);
-        if (validationResult != null) {
+        if (!validationResult.isSuccess()) {
             return validationResult;
         }
 
         jobSeekerDao.save(jobSeeker);
-        verificationCodeService.addForUser(jobSeeker);
-        verificationCodeService.verifyByUser(jobSeeker);
+
+        String code = verificationCodeService.generateCode();
+        verificationCodeService.add(new VerificationCode(jobSeeker, code));
+
+        // Fake verification
+        verify(jobSeeker.getId(), code);
 
         return new SuccessResult("Job Seeker added: " + jobSeeker.getFirstName());
     }
@@ -52,11 +57,15 @@ public class JobSeekerManager implements JobSeekerService {
             return new ErrorResult("Job Seeker with id: " + id + " cannot be updated. He/She does not exist.");
         }
 
+        existingJobSeeker.setEmail(jobSeeker.getEmail());
+        existingJobSeeker.setPassword(jobSeeker.getPassword());
+        existingJobSeeker.setIsDeleted(jobSeeker.getIsDeleted());
+
         existingJobSeeker.setFirstName(jobSeeker.getFirstName());
         existingJobSeeker.setLastName(jobSeeker.getLastName());
         existingJobSeeker.setIdentityNumber(jobSeeker.getIdentityNumber());
-        existingJobSeeker.setEmail(jobSeeker.getEmail());
         existingJobSeeker.setBirthDate(jobSeeker.getBirthDate());
+        existingJobSeeker.setIsVerified(jobSeeker.getIsVerified());
 
         jobSeekerDao.save(existingJobSeeker);
 
@@ -66,12 +75,12 @@ public class JobSeekerManager implements JobSeekerService {
     @Override
     public Result delete(Integer id) {
         JobSeeker jobSeeker = getById(id).getData();
-
         if (jobSeeker == null) {
             return new ErrorResult("Job Seeker with id: " + id + " cannot be deleted. He/She does not exist.");
         }
 
-        jobSeekerDao.delete(jobSeeker);
+        jobSeeker.setIsDeleted(true);
+        jobSeekerDao.save(jobSeeker);
 
         return new SuccessResult("Job Seeker deleted with id: " + id);
     }
@@ -80,7 +89,7 @@ public class JobSeekerManager implements JobSeekerService {
     public DataResult<JobSeeker> getById(Integer id) {
         Optional<JobSeeker> optionalJobSeeker = jobSeekerDao.findById(id);
 
-        if (optionalJobSeeker.isEmpty()) {
+        if (optionalJobSeeker.isEmpty() || optionalJobSeeker.get().getIsDeleted()) {
             return new ErrorDataResult<>("Job Seeker with id: " + id + " does not exist.");
         }
 
@@ -89,9 +98,29 @@ public class JobSeekerManager implements JobSeekerService {
 
     @Override
     public DataResult<List<JobSeeker>> getAll() {
-        return new SuccessDataResult<>(jobSeekerDao.findAll(), "Job Seeker data listed");
+        return new SuccessDataResult<>(jobSeekerDao.findByIsDeletedFalse(), "Job Seeker data listed");
     }
 
+    @Override
+    public Result verify(Integer jobSeekerId, String verificationCode) {
+        JobSeeker existingJobSeeker = getById(jobSeekerId).getData();
+        if (existingJobSeeker == null) {
+            return new ErrorResult("Job Seeker with id: " + jobSeekerId + " cannot be verified. He/She does not exist.");
+        }
+
+        VerificationCode existingVerificationCode = verificationCodeService.getByCode(verificationCode);
+        if (existingVerificationCode == null) {
+            return new ErrorResult("Job Seeker's Verification Code with code: " + verificationCode + " cannot be verified. It does not exist.");
+        }
+
+        existingJobSeeker.setIsVerified(true);
+        jobSeekerDao.save(existingJobSeeker);
+
+        existingVerificationCode.setIsVerified(true);
+        verificationCodeService.update(existingVerificationCode.getId(), existingVerificationCode);
+
+        return new SuccessResult("Job Seeker with id: " + jobSeekerId + " verified.");
+    }
 
     private boolean emailExists(String email) {
         return jobSeekerDao.findByEmail(email) != null;
@@ -133,6 +162,6 @@ public class JobSeekerManager implements JobSeekerService {
             return new ErrorResult("Please enter your information correctly. Mernis couldn't find a person with this information.");
         }
 
-        return null;
+        return new SuccessResult("Job Seeker validated");
     }
 }
