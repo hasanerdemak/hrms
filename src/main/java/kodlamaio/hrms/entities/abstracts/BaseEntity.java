@@ -1,4 +1,4 @@
-package kodlamaio.hrms.core.entities;
+package kodlamaio.hrms.entities.abstracts;
 
 public interface BaseEntity<T> {
 

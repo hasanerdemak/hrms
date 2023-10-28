@@ -1,14 +1,19 @@
-package kodlamaio.hrms.core.entities;
+package kodlamaio.hrms.entities.concretes;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import kodlamaio.hrms.core.enums.UserType;
+import kodlamaio.hrms.entities.abstracts.BaseEntity;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "users")
@@ -16,7 +21,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
-@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User implements BaseEntity<Integer> {
 
     @Id
@@ -35,19 +40,35 @@ public class User implements BaseEntity<Integer> {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @NotNull(message = "The user type field cannot be null.")
-    @NotBlank(message = "The user type field cannot be blank.")
+    @NotNull
+    @NotBlank
     @Column(name = "user_type", nullable = false)
-    private String userType;
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT NOW()")
+    @NotNull
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
+    private Boolean isDeleted;
+
+    @NotNull
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
     private ZonedDateTime createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT NOW()")
+    @NotNull
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
     private ZonedDateTime updatedAt;
 
-    @Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
-    private Boolean isActive;
+    @PrePersist
+    public void prePersist() {
+        this.isDeleted = false;
+        this.createdAt = ZonedDateTime.now();
+        this.updatedAt = ZonedDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = ZonedDateTime.now();
+    }
 }

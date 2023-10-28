@@ -1,14 +1,11 @@
 package kodlamaio.hrms.business.abstracts;
 
-import kodlamaio.hrms.core.entities.User;
-import kodlamaio.hrms.core.utilities.results.Result;
 import kodlamaio.hrms.entities.concretes.VerificationCode;
 
 public interface VerificationCodeService extends BaseEntityService<VerificationCode, Integer> {
 
-    Result addForUser(User user);
+    VerificationCode getByCode(String code);
 
-    Result verifyById(int id);
+    String generateCode();
 
-    Result verifyByUser(User user);
 }
