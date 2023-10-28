@@ -4,8 +4,6 @@ import kodlamaio.hrms.core.utilities.results.ErrorResult;
 import kodlamaio.hrms.core.utilities.results.Result;
 import kodlamaio.hrms.core.utilities.results.SuccessResult;
 
-import java.util.regex.Pattern;
-
 public class NameValidator {
     private static final int MIN_NAME_LENGTH = 2;
     private static final int MAX_NAME_LENGTH = 35;

@@ -4,8 +4,6 @@ import kodlamaio.hrms.core.utilities.results.ErrorResult;
 import kodlamaio.hrms.core.utilities.results.Result;
 import kodlamaio.hrms.core.utilities.results.SuccessResult;
 
-import java.util.regex.Pattern;
-
 public class PasswordValidator {
     private static final int MIN_PASSWORD_LENGTH = 6;
     private static final int MAX_PASSWORD_LENGTH = 25;
