@@ -4,7 +4,7 @@ import kodlamaio.hrms.entities.concretes.JobSeeker;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.sql.Date;
 
 @Service
 public class MernisServiceAdapter implements JobSeekerCheckService {
